@@ -1,11 +1,12 @@
 import React, { Component } from 'react';
 import style from './Form.module.css'
-import './Form.module.css'
+import './Form.css'
 import { v4 as uuidv4 } from 'uuid';
 import ListPeople from './ListPeople/ListPeople';
 import FillterForm from './FillterForm/FillterForm';
 import ContactForm from './ContactForm/ContactForm';
 import { CSSTransition } from 'react-transition-group'
+import AlertModal from '../Alert/Alert'
 
 
 
@@ -16,13 +17,16 @@ export default class App extends Component {
     name: '',
     number: '',
     filter: '',
-    inShow: true,
+    inShow: false,
+    AlertShow:false,
+
   }
 
   componentDidMount() {
+
     const localdata = localStorage.getItem("contacts")
     if (localdata) {
-      this.setState({ contacts: JSON.parse(localdata) })
+      this.setState({ contacts: JSON.parse(localdata), inShow: true })
     }
   }
 
@@ -31,7 +35,7 @@ export default class App extends Component {
       localStorage.setItem("contacts", JSON.stringify(this.state.contacts))
 
     }
-    console.log(this.state)
+
   }
 
   handleChange = (e) => {
@@ -47,14 +51,28 @@ export default class App extends Component {
   handleSubmit = (e) => {
     e.preventDefault();
     const { name, number } = this.state;
-    console.log(this.state)
+
     this.addContact({ id: uuidv4(), name, number })
     this.setState({ name: '', number: '', filter: '' })
+    console.log('this.state', this.state)
   }
 
-  addContact = (contact) => {
-    this.setState(prevState => ({ contacts: [...prevState.contacts, contact] }))
+  addContact = (newContact) => {
+    const { contacts } = this.state;
+    if (contacts.find((item) => item.name === newContact.name)) {
+      this.setState({ AlertShow: true });
+      setTimeout(() => this.setState({ AlertShow: false }), 5000);
+      return;
+    } else {
+      this.setState((prevState) => {
+        return {
+          contacts: [...prevState.contacts, newContact],
+        };
+      });
+    }
   }
+
+;
 
   getInfo = () => {
     const { contacts, filter } = this.state;
@@ -74,17 +92,29 @@ export default class App extends Component {
   }
 
   render() {
-    const { name, number, filter, inShow } = this.state;
+    const { name, number, filter, AlertShow } = this.state;
+    console.log('AlertShow', AlertShow)
     return (
+      <>
+        {AlertShow && <CSSTransition
+          classNames={style}
+          in={true}
+          appear={true}
+          timeout={1500}
+          unmountOnExit
+        >
+          <AlertModal />
+        </CSSTransition>}
         <form onSubmit={this.handleSubmit} className={style.formContainer}>
-          <CSSTransition in={inShow} classNames="title" timeout={550} unmountOnExit>
+          <CSSTransition in={true} appear={true} classNames="title" timeout={1000} unmountOnExit>
             <h2>Phonebook</h2>
-            </CSSTransition>
-            <ContactForm handleChange={this.handleChange} name={name} number={number} />
-            <FillterForm filter={filter} onChange={this.handleChange} />
-            {filter !== "" && <ListPeople contacts={this.getInfo()} deliteContact={this.deliteContac} />}
+          </CSSTransition>
+          <ContactForm handleChange={this.handleChange} name={name} number={number} />
+          <FillterForm filter={filter} onChange={this.handleChange} />
+          <ListPeople contacts={this.getInfo()} deliteContact={this.deliteContac} />
         </form>
-     
+      </>
+
     );
   }
 }
