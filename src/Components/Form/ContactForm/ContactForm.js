@@ -1,6 +1,7 @@
 import React from 'react';
 import style from './ContactForm.module.css'
 import PropTypes from 'prop-types';
+import { Button } from 'react-bootstrap';
 
 const ContactForm = ({ name, number, handleChange }) => {
   return (
@@ -13,7 +14,8 @@ const ContactForm = ({ name, number, handleChange }) => {
         <p>Number</p>
            <input type="text" name="number" onChange={handleChange} value={number} />
       </label>
-      <button type="submit">Add contacts</button>
+      {/* <Button variant="outline-primary">Add contacts</Button>{' '} */}
+      <button type="submit">Add</button>
     </div>
   )
 }
